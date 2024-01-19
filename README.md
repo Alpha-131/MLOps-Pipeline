@@ -36,5 +36,5 @@ The pipeline consists of the following steps:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   git clone https://github.com/Alpha-131/MYM-assessment-task.git
+   cd MYM-assessment-task

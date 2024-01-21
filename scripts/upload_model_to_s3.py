@@ -20,8 +20,8 @@
 #         tar.add(local_model_path, arcname=os.path.basename(local_model_path))
         
 #     # Set your AWS credentials explicitly
-#     aws_access_key_id = 'AKIATGDVHKWHDVM7Y7PX'
-#     aws_secret_access_key = 'Ydy+tYF3Q8T2m0SPgLpoILuNuOFISbUC3zY6nN6A'
+#     aws_access_key_id = 'aws_access_key_id'
+#     aws_secret_access_key = 'aws_secret_access_key'
 #     aws_session_token = None  
 
 #     # Create an S3 client and upload the compressed model

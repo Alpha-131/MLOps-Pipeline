@@ -1,4 +1,5 @@
 # GPT-2 SageMaker Deployment
+** Note - Before you refer to this project; This project is still in progress and not yet complete.   
 
 ## Overview
 

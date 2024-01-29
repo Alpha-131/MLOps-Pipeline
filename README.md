@@ -1,40 +1,47 @@
 # GPT-2 SageMaker Deployment
-** Note - Before you refer to this project; This project is still in progress and not yet complete.   
 
 ## Overview
 
-This project demonstrates the deployment of a GPT-2 model on Amazon SageMaker using the Hugging Face Transformers library.
-
-In this project, I utilized the Hugging Face Transformers library to directly download a pretrained GPT-2 model and tokenizer from the HF model hub. Rather than training and preprocessing, I leveraged the pretrained model directly.
-
-The deployment process involves uploading the model artifacts to an S3 bucket and then deploying the model on Amazon SageMaker using the Hugging Face SageMaker SDK.
-
-**Note:** While deploying, I encountered an error during the inference/prediction phase. Further investigation is needed to resolve this issue.
+This project involves deploying a pre-trained GPT-2 model from the Hugging Face model hub to Amazon SageMaker for real-time inference. The deployment process includes uploading the model weights to an AWS S3 bucket and integrating the endpoint with AWS Lambda function and API Gateway.
 
 ## Project Structure
 
-- `upload_to_s3.py`: Script to upload GPT-2 model artifacts to an S3 bucket.
-- `deploy_to_sagemaker.py`: Script to create a SageMaker model and deploy it using the Hugging Face SageMaker SDK.
+- `data/`: Contains all the data used in the project.
+- `model/`: Contains all the model weights.
+- `notebooks/`: Contains all the experiments and work done on the model before deployment.
+- `scripts/`: Contains Python scripts which run when a new change is made and committed. These files can be run individually on your local system using a CLI.
+- `src/`: Contains the model as a package along with all the modules.
+- `tests/`: Contains multiple tests depending on the requirements.
+- `requirements.txt`: Lists all dependencies for the project.
 
-## Usage
+## Usage (MLOps Pipeline)
 
-1. Run the `upload_to_s3.py` script to upload the GPT-2 model to an S3 bucket.
-   ```bash
-   python upload_to_s3.py
-   ```
-
-2. Set up your SageMaker model by running the `deploy_to_sagemaker.py` script.
-   ```bash
-   python deploy_to_sagemaker.py
-   ```
+1. Clone the GitHub repo:
+    ```bash
+    git clone https://github.com/Alpha-131/MYM-assessment-task.git
+    ```
+2. Change the AWS configurations inside all the scripts according to your needs.
+3. Upload the GPT-2 model to an S3 bucket:
+    ```bash
+    python upload_to_s3.py
+    ```
+4. Set up the SageMaker model:
+    ```bash
+    python deploy_to_sagemaker.py
+    ```
+5. Setup the Lambda function and add the endpoint to it.
+6. Use API Gateway to create a stage for production or testing. Add your Lambda function with all necessary execution roles.
+7. You are ready to use the API URL now to send requests:
+    ```
+    https://<some_random_code>.execute-api.<region>.amazonaws.com/<stage_name>/<resource_name>
+    ```
 
 ## Remaining Tasks
 - [X] Downloaded the GPT-2 model
 - [X] Created a model.tar.gz file for model artifacts
 - [X] Uploaded model.tar.gz to Amazon S3
-- [ ] Investigate and resolve the error during endpoint inference.
+- [X] Investigate and resolve the error during endpoint inference.
 - [ ] Set up a CI/CD pipeline for automated deployment.
 - [ ] Write a YAML file for CI/CD pipeline configuration.
 - [ ] Implement monitoring and logging for SageMaker endpoints.
 - [ ] Configure autoscaling for dynamic scaling based on traffic.
-

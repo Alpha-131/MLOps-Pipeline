@@ -44,8 +44,8 @@ def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
     predictor = huggingface_model.deploy(
         initial_instance_count=1,
         instance_type=instance_type,
-        endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint name
-    ) 
+        endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint 
+    )  
     
     pred = predictor.predict(
         {

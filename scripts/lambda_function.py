@@ -8,7 +8,7 @@ def lambda_handler(event, context):
 
         # Call the SageMaker endpoint for inference
         sagemaker_client = boto3.client('sagemaker-runtime')
-        endpoint_name = "your-sagemaker-endpoint-name"  # Replace with your actual SageMaker endpoint name
+        endpoint_name = "gpt-2-model-endpoint-realtime-inference"  # Replace with your actual SageMaker endpoint name
 
         response = sagemaker_client.invoke_endpoint(
             EndpointName=endpoint_name,

@@ -45,7 +45,7 @@ def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
         initial_instance_count=1,
         instance_type=instance_type,
         endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint name
-    )
+    ) 
     
     pred = predictor.predict(
         {

@@ -8,8 +8,9 @@ import os
 
 def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
     # Create a SageMaker session
-    sagemaker_session = sagemaker.Session()
-    region = sagemaker_session.boto_region_name
+    region = os.getenv('AWS_REGION')
+    sagemaker_session = sagemaker.Session(region_name=region)
+    # region = sagemaker_session.boto_region_name
 
     image_uri = get_huggingface_llm_image_uri(backend="huggingface", region=region)
     

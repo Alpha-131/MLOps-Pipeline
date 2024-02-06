@@ -1,79 +1,79 @@
 #######################################################################################################################################
 ### Realtime Inference
 
-import sagemaker
-from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
-import time
-import os 
+# import sagemaker
+# from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
+# import time
+# import os 
 
-def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
-    # Create a SageMaker session
-    region = os.getenv('AWS_REGION')
-    sagemaker_session = sagemaker.Session()
-    # region = sagemaker_session.boto_region_name
+# def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
+#     # Create a SageMaker session
+#     region = os.getenv('AWS_REGION')
+#     sagemaker_session = sagemaker.Session()
+#     # region = sagemaker_session.boto_region_name
 
-    image_uri = get_huggingface_llm_image_uri(backend="huggingface", region=region)
+#     image_uri = get_huggingface_llm_image_uri(backend="huggingface", region=region)
     
-    model_name = "gpt-2-model"
+#     model_name = "gpt-2-model"
 
-    hub = {
-        "HF_MODEL_ID": "gpt2", 
-        "HF_TASK": "text-generation",
-    #     "SM_NUM_GPUS": "1",
-    }
+#     hub = {
+#         "HF_MODEL_ID": "gpt2", 
+#         "HF_TASK": "text-generation",
+#     #     "SM_NUM_GPUS": "1",
+#     }
 
-    huggingface_model = HuggingFaceModel(
-        model_data=model_s3_uri,
-        name=model_name, 
-        env=hub, 
-        role=role_arn, 
-        image_uri=image_uri
-    )
+#     huggingface_model = HuggingFaceModel(
+#         model_data=model_s3_uri,
+#         name=model_name, 
+#         env=hub, 
+#         role=role_arn, 
+#         image_uri=image_uri
+#     )
     
-    # # Create Hugging Face Model Class
-    # huggingface_model = HuggingFaceModel(
-    #     model_data=model_s3_uri,  # S3 path to your model
-    #     role=role_arn,  # IAM role with permissions to create an endpoint
-    #     sagemaker_session=sagemaker_session,
-    #     transformers_version="4.6",  # Transformers version used
-    #     pytorch_version="1.7",  # PyTorch version used
-    #     py_version='py36',  # Python version used
-    #     env={'HF_TASK': 'text-generation'}
-    # )
+#     # # Create Hugging Face Model Class
+#     # huggingface_model = HuggingFaceModel(
+#     #     model_data=model_s3_uri,  # S3 path to your model
+#     #     role=role_arn,  # IAM role with permissions to create an endpoint
+#     #     sagemaker_session=sagemaker_session,
+#     #     transformers_version="4.6",  # Transformers version used
+#     #     pytorch_version="1.7",  # PyTorch version used
+#     #     py_version='py36',  # Python version used
+#     #     env={'HF_TASK': 'text-generation'}
+#     # )
 
-    # Deploy the model to create a SageMaker endpoint
-    predictor = huggingface_model.deploy(
-        initial_instance_count=1,
-        instance_type=instance_type,
-        endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint 
-    )  
+#     # Deploy the model to create a SageMaker endpoint
+#     predictor = huggingface_model.deploy(
+#         initial_instance_count=1,
+#         instance_type=instance_type,
+#         endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint 
+#     )  
     
-    pred = predictor.predict(
-        {
-        "inputs": "We at MYM as a advertising and marketing agency, ",
-        "parameters": {
-            "do_sample": True,
-            "max_new_tokens": 100,
-            "temperature": 0.7,
-            "num_beams": 5,
-        },
-    })
-    print(pred)
+#     pred = predictor.predict(
+#         {
+#         "inputs": "We at MYM as a advertising and marketing agency, ",
+#         "parameters": {
+#             "do_sample": True,
+#             "max_new_tokens": 100,
+#             "temperature": 0.7,
+#             "num_beams": 5,
+#         },
+#     })
+#     print(pred)
     
-    # Return the endpoint name for reference
-    return huggingface_model.endpoint_name
+#     # Return the endpoint name for reference
+#     return huggingface_model.endpoint_name
 
-if __name__ == "__main__":
-    # Set your model S3 URI, SageMaker role, and instance type
-    model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
-    # model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/model.tar.gz"
-    role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
-    instance_type = "ml.m5.xlarge"  # Eligible for the AWS Free Tier
+# if __name__ == "__main__":
+#     # Set your model S3 URI, SageMaker role, and instance type
+#     model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
+#     # model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/model.tar.gz"
+#     role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
+#     instance_type = "ml.m5.xlarge"  # Eligible for the AWS Free Tier
 
-    os.environ["HF_TASK"] = "text-generation"
-    # Deploy the GPT-2 model to SageMaker
-    endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type)
-    print("SageMaker Endpoint Name:", endpoint_name)
+#     os.environ["HF_TASK"] = "text-generation"
+#     # Deploy the GPT-2 model to SageMaker
+#     endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type)
+#     print("SageMaker Endpoint Name:", endpoint_name)
 
 
 ########################################################################################################################################
@@ -189,61 +189,63 @@ if __name__ == "__main__":
 #######################################################################################################################################
 # ### TEST :
 
-# import json
-# import sagemaker
-# import os
-# import boto3
-# from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
+import boto3
+from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
+import time
+import os 
 
-# def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
-#     # try:
-#     #     role = sagemaker.get_execution_role()
-#     # except ValueError:
-#     #     iam = boto3.client('iam')
-#     #     role = iam.get_role(RoleName='sagemaker_execution_role')['Role']['Arn']
-#     sagemaker_session = sagemaker.Session()
+def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
+    # Create a SageMaker client
+    sagemaker_client = boto3.client('sagemaker')
+    region = os.getenv('AWS_REGION')
+    
+    image_uri = get_huggingface_llm_image_uri(backend="huggingface", region=region)
+    
+    model_name = "gpt-2-model"
 
-#     # Hub Model configuration. https://huggingface.co/models
-#     hub = {
-#         'HF_MODEL_ID': 'gpt2',
-#         # 'SM_NUM_GPUS': json.dumps(1)
-#     }
+    hub = {
+        "HF_MODEL_ID": "gpt2", 
+        "HF_TASK": "text-generation",
+    }
 
-#     # Create Hugging Face Model Class
-#     huggingface_model = HuggingFaceModel(
-#         image_uri=get_huggingface_llm_image_uri("huggingface", version="1.1.0"),
-#         sagemaker_session=sagemaker_session,
-#         env=hub,
-#         role=role_arn,
-#     )
+    huggingface_model = HuggingFaceModel(
+        model_data=model_s3_uri,
+        name=model_name, 
+        env=hub, 
+        role=role_arn, 
+        image_uri=image_uri
+    )
+    
+    # Deploy the model to create a SageMaker endpoint
+    huggingface_model.deploy(
+        initial_instance_count=1,
+        instance_type=instance_type,
+        endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint 
+    )  
+    
+    # Wait for the endpoint to be in service
+    endpoint_status = None
+    while endpoint_status != 'InService':
+        response = sagemaker_client.describe_endpoint(EndpointName="gpt-2-model-endpoint-realtime-inference")
+        endpoint_status = response["EndpointStatus"]
+        time.sleep(10)  # Wait for 10 seconds before checking again
+    
+    print("SageMaker Endpoint is now in service.")
+    
+    # Return the endpoint name for reference
+    return "gpt-2-model-endpoint-realtime-inference"
 
-#     # Deploy the model to create a SageMaker endpoint
-#     predictor = huggingface_model.deploy(
-#         initial_instance_count=1,
-#         instance_type=instance_type,
-#         container_startup_health_check_timeout=300,
-#         endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint name
-#     )
+if __name__ == "__main__":
+    # Set your model S3 URI, SageMaker role, and instance type
+    model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
+    role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
+    instance_type = "ml.m5.xlarge"  # Eligible for the AWS Free Tier
 
-#     # Send a request to the deployed endpoint
-#     pred = predictor.predict({
-#         "inputs": "We at matt young media, as an advertising and marketing"
-#     })
-#     print(pred)
-
-#     # Return the endpoint name for reference
-#     return huggingface_model.endpoint_name
-
-# if __name__ == "__main__":
-#     # Set your model S3 URI, SageMaker role, and instance type
-#     model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
-#     role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
-#     instance_type = "ml.m5.xlarge"  # Replace with your desired instance type
-
-#     # Deploy the GPT-2 model to SageMaker
-#     endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type)
-#     print("SageMaker Endpoint Name:", endpoint_name)
-
+    os.environ["HF_TASK"] = "text-generation"
+    
+    # Deploy the GPT-2 model to SageMaker
+    endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type)
+    print("SageMaker Endpoint Name:", endpoint_name)
 
 
 

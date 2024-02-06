@@ -35,11 +35,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ACCESS_KEY_ID: AKIATGDVHKWHDVM7Y7PX
+      AWS_SECRET_ACCESS_KEY: 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
       AWS_REGION: ap-south-1  # Add AWS Region here
-      # S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}  # Reference a secret for S3 bucket name
-      # ROLE_ARN: ${{ secrets.ROLE_ARN }}  # Reference a secret for IAM Role ARN
+      # S3_BUCKET_NAME:   # Reference a secret for S3 bucket name
+      # ROLE_ARN:  # Reference a secret for IAM Role ARN
       # MODEL_NAME: my-model  # Directly specify a model name here
 
     steps:

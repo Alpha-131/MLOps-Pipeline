@@ -1,10 +1,10 @@
-########################################################################################################################################
+#######################################################################################################################################
 ### Realtime Inference
 
 import sagemaker
 from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
 import time
-import os
+import os 
 
 def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
     # Create a SageMaker session

@@ -194,10 +194,9 @@ from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_ur
 import time
 import os 
 
-def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
+def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region):
     # Create a SageMaker client
-    sagemaker_client = boto3.client('sagemaker')
-    region = os.getenv('AWS_REGION')
+    sagemaker_client = boto3.client('sagemaker', region_name=region)
     
     image_uri = get_huggingface_llm_image_uri(backend="huggingface", region=region)
     
@@ -236,15 +235,16 @@ def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
     return "gpt-2-model-endpoint-realtime-inference"
 
 if __name__ == "__main__":
-    # Set your model S3 URI, SageMaker role, and instance type
+    # Set your model S3 URI, SageMaker role, instance type, and region
     model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
     role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
     instance_type = "ml.m5.xlarge"  # Eligible for the AWS Free Tier
+    region = "ap-south-1"
 
     os.environ["HF_TASK"] = "text-generation"
     
     # Deploy the GPT-2 model to SageMaker
-    endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type)
+    endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region)
     print("SageMaker Endpoint Name:", endpoint_name)
 
 

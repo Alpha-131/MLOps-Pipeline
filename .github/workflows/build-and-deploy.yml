@@ -53,13 +53,10 @@ jobs:
       - name: Configure AWS credentials
         id: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v1
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION: ap-south-1  # Add AWS Region here
-            # S3_BUCKET_NAME:   # Reference a secret for S3 bucket name
-            # ROLE_ARN:  # Reference a secret for IAM Role ARN
-            # MODEL_NAME: my-model  # Directly specify a model name here
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1  # Add AWS Region here
         
       # - name: Upload model to S3
       #   run: python scripts/upload_model_to_s3.py

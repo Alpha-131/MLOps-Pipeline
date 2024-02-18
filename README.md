@@ -4,6 +4,12 @@
 
 This project orchestrates the seamless deployment of a pre-trained GPT-2 model from the Hugging Face model hub onto Amazon SageMaker, enabling real-time inference. By leveraging AWS S3 for model storage and integrating the endpoint with AWS Lambda function and API Gateway, this deployment ensures efficient and scalable model serving.
 
+## Architecture for MLOps Pipeline
+
+<img src="https://github.com/Alpha-131/MLOps-Pipeline/assets/92028472/ac51219f-d2ba-40c3-a2b6-a3fb19cb3e54" width="800">
+
+The MLOps pipeline architecture illustrates the flow of activities involved in deploying and managing machine learning models. This comprehensive workflow encompasses various stages, including data preparation, model training, deployment, monitoring, and maintenance. Each stage plays a crucial role in ensuring the successful and efficient operation of machine learning systems.
+
 ## Project Structure
 
 - `data/`: Houses all project-related data.
@@ -50,8 +56,9 @@ This project orchestrates the seamless deployment of a pre-trained GPT-2 model f
 - [X] Download GPT-2 model weights.
 - [X] Create model.tar.gz file for artifacts.
 - [X] Upload model.tar.gz to Amazon S3.
-- [X] Investigate and resolve endpoint inference errors.
-- [ ] Establish CI/CD pipeline for automated deployment.
-- [ ] Define YAML configuration file for CI/CD pipeline.
-- [ ] Implement robust monitoring and logging for SageMaker endpoints.
+- [X] Write deployment script for sagemaker endpoint.
+- [X] Establish CI/CD pipeline for automated deployment.
+- [X] Define YAML configuration file for CI/CD pipeline.
+- [X] Implement monitoring using AWS Cloudwatch for sagemaker endpoint.
+- [X] Implement logging using Cloudtrail and store it in S3 bucket for SageMaker endpoints.
 - [ ] Configure autoscaling for dynamic traffic-based scaling.

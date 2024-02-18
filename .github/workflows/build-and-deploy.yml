@@ -61,8 +61,10 @@ jobs:
       # - name: Upload model to S3
       #   run: python scripts/upload_model_to_s3.py
 
-      - name: Deploy to SageMaker
-        run: python scripts/deploy_to_sagemaker.py
+      # - name: Deploy to SageMaker
+      #   run: python scripts/deploy_to_sagemaker.py
 
-      # - name: Run lambda function
-      #   run: python scripts/lambda_function.py
+      - name: Deploy Lambda Function
+        run: 
+          aws lambda update-function-code --function-name gpt-2-model-lambda --zip-file fileb://lambda_function.zip
+          aws lambda update-function-configuration --function-name gpt-2-model-lambda --environment "Variables={SAGEMAKER_ENDPOINT=gpt-2-model-endpoint-realtime-inference}"

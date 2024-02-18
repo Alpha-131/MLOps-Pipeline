@@ -1,17 +1,62 @@
 #######################################################################################################################################
 ### Realtime Inference
 
+
+# import boto3
 # import sagemaker
 # from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
 # import time
 # import os 
 
-# def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type):
-#     # Create a SageMaker session
-#     region = os.getenv('AWS_REGION')
-#     sagemaker_session = sagemaker.Session()
-#     # region = sagemaker_session.boto_region_name
+# def setup_cloudtrail(region, trail_name, s3_bucket_name):
+#     # Create a CloudTrail client
+#     cloudtrail_client = boto3.client('cloudtrail', region_name=region)
 
+#     try:
+#         # Attempt to create the trail
+#         response = cloudtrail_client.create_trail(
+#             Name=trail_name,
+#             S3BucketName=s3_bucket_name
+#         )
+#         print("CloudTrail trail created.")
+#     except cloudtrail_client.exceptions.TrailAlreadyExistsException:
+#         # If the trail already exists, just print a message
+#         print("CloudTrail trail already exists.")
+    
+#     try:
+#         # Specify event selectors to filter the events captured by the trail
+#         event_selectors = {
+#             'ReadWriteType': 'All',
+#             'IncludeManagementEvents': True,
+#             'DataResources': [
+#                 {
+#                     'Type': 'AWS::SageMaker::Endpoint',
+#                     'Values': ['*']
+#                 }
+#             ]
+#         }
+
+#         # Update the trail to include event selectors
+#         cloudtrail_client.update_trail(
+#             Name=trail_name,
+#             EventSelectors=[event_selectors]
+#         )
+
+#         # Start logging
+#         cloudtrail_client.start_logging(Name=trail_name)
+#         print("Logging started for CloudTrail trail.")
+#     except Exception as e:
+#         print(f"Error updating CloudTrail trail: {e}")
+
+
+# def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region, capture_s3_uri):
+#     # Set up CloudTrail
+#     place = region
+#     # setup_cloudtrail(place, "sagemaker-cloudtrail", capture_s3_uri.split('/')[2])
+
+#     # Create a SageMaker client
+#     sagemaker_client = boto3.client('sagemaker', region_name=region)
+    
 #     image_uri = get_huggingface_llm_image_uri(backend="huggingface", region=region)
     
 #     model_name = "gpt-2-model"
@@ -19,7 +64,6 @@
 #     hub = {
 #         "HF_MODEL_ID": "gpt2", 
 #         "HF_TASK": "text-generation",
-#     #     "SM_NUM_GPUS": "1",
 #     }
 
 #     huggingface_model = HuggingFaceModel(
@@ -30,50 +74,91 @@
 #         image_uri=image_uri
 #     )
     
-#     # # Create Hugging Face Model Class
-#     # huggingface_model = HuggingFaceModel(
-#     #     model_data=model_s3_uri,  # S3 path to your model
-#     #     role=role_arn,  # IAM role with permissions to create an endpoint
-#     #     sagemaker_session=sagemaker_session,
-#     #     transformers_version="4.6",  # Transformers version used
-#     #     pytorch_version="1.7",  # PyTorch version used
-#     #     py_version='py36',  # Python version used
-#     #     env={'HF_TASK': 'text-generation'}
-#     # )
-
+#     data_capture_config = sagemaker.model_monitor.DataCaptureConfig(
+#         enable_capture=True,
+#         sampling_percentage=100,
+#         destination_s3_uri=capture_s3_uri
+#     )
+    
 #     # Deploy the model to create a SageMaker endpoint
-#     predictor = huggingface_model.deploy(
+#     huggingface_model.deploy(
 #         initial_instance_count=1,
 #         instance_type=instance_type,
-#         endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint 
+#         endpoint_name="gpt-2-model-endpoint-realtime-inference",  # Replace with your desired endpoint 
+#         data_capture_config=data_capture_config  # Pass data capture config
 #     )  
     
-#     pred = predictor.predict(
-#         {
-#         "inputs": "We at MYM as a advertising and marketing agency, ",
-#         "parameters": {
-#             "do_sample": True,
-#             "max_new_tokens": 100,
-#             "temperature": 0.7,
-#             "num_beams": 5,
-#         },
-#     })
-#     print(pred)
+#     # Wait for the endpoint to be in service
+#     endpoint_status = None
+#     while endpoint_status != 'InService':
+#         response = sagemaker_client.describe_endpoint(EndpointName="gpt-2-model-endpoint-realtime-inference")
+#         endpoint_status = response["EndpointStatus"]
+#         time.sleep(120)  # Wait for 120 seconds before checking again
     
+#     print("SageMaker Endpoint is now in service.")
+    
+#     # # Configure CloudWatch to monitor the endpoint
+#     # cloudwatch_client = boto3.client('cloudwatch')
+#     # cloudwatch_client.put_metric_alarm(
+#     #     AlarmName='YourEndpointHealthAlarm',
+#     #     ComparisonOperator='GreaterThanThreshold',
+#     #     EvaluationPeriods=1,
+#     #     MetricName='CPUUtilization',
+#     #     Namespace='AWS/SageMaker',
+#     #     Period=60,
+#     #     Statistic='Average',
+#     #     Threshold=70.0,
+#     #     ActionsEnabled=False,
+#     #     AlarmDescription='Alarm when CPU utilization exceeds 70%',
+#     #     Dimensions=[
+#     #         {
+#     #             'Name': 'EndpointName',
+#     #             'Value': 'gpt-2-model-endpoint-realtime-inference'
+#     #         },
+#     #     ],
+#     #     Unit='Percent'
+#     # )
+    
+#     # print("CloudWatch monitoring configured.")
+    
+#     # # Set up a CloudWatch event rule to trigger storing the metrics in S3 periodically
+#     # cloudwatch_events_client = boto3.client('events')
+
+#     # response = cloudwatch_events_client.put_rule(
+#     #     Name='CaptureDataToS3Rule',
+#     #     ScheduleExpression='rate(5 minutes)',  # Adjust the schedule as needed
+#     #     State='ENABLED'
+#     # )
+
+#     # cloudwatch_events_client.put_targets(
+#     #     Rule='CaptureDataToS3Rule',
+#     #     Targets=[
+#     #         {
+#     #             'Id': '1',
+#     #             'Arn': 'arn:aws:lambda:ap-south-1:219289179534:function:gpt-2-model-lambda'  # Replace with your Lambda function ARN
+#     #         },
+#     #     ]
+#     # )
+    
+#     # print("CloudWatch event rule set up.")
+
 #     # Return the endpoint name for reference
-#     return huggingface_model.endpoint_name
+#     return "gpt-2-model-endpoint-realtime-inference"
 
 # if __name__ == "__main__":
-#     # Set your model S3 URI, SageMaker role, and instance type
+#     # Set your model S3 URI, SageMaker role, instance type, region, and capture S3 URI
 #     model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
-#     # model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/model.tar.gz"
 #     role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
-#     instance_type = "ml.m5.xlarge"  # Eligible for the AWS Free Tier
+#     instance_type = "ml.m5.xlarge"  
+#     region = "ap-south-1"
+#     capture_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/logs/"  # Replace with your capture bucket
 
 #     os.environ["HF_TASK"] = "text-generation"
+    
 #     # Deploy the GPT-2 model to SageMaker
-#     endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type)
+#     endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region, capture_s3_uri)
 #     print("SageMaker Endpoint Name:", endpoint_name)
+
 
 
 ########################################################################################################################################
@@ -190,11 +275,56 @@
 #### TEST :
 
 import boto3
+import sagemaker
 from sagemaker.huggingface import HuggingFaceModel, get_huggingface_llm_image_uri
 import time
 import os 
 
-def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region):
+def setup_cloudtrail(region, trail_name, s3_bucket_name):
+    # Create a CloudTrail client
+    cloudtrail_client = boto3.client('cloudtrail', region_name=region)
+
+    try:
+        # Attempt to create the trail
+        response = cloudtrail_client.create_trail(
+            Name=trail_name,
+            S3BucketName=s3_bucket_name
+        )
+        print("CloudTrail trail created.")
+    except cloudtrail_client.exceptions.TrailAlreadyExistsException:
+        # If the trail already exists, just print a message
+        print("CloudTrail trail already exists.")
+    
+    try:
+        # Specify event selectors to filter the events captured by the trail
+        event_selectors = {
+            'ReadWriteType': 'All',
+            'IncludeManagementEvents': True,
+            'DataResources': [
+                {
+                    'Type': 'AWS::SageMaker::Endpoint',
+                    'Values': ['*']
+                }
+            ]
+        }
+
+        # Update the trail to include event selectors
+        cloudtrail_client.put_event_selectors(
+            TrailName=trail_name,
+            EventSelectors=[event_selectors]
+        )
+
+        # Start logging
+        cloudtrail_client.start_logging(Name=trail_name)
+        print("Logging started for CloudTrail trail.")
+    except Exception as e:
+        print(f"Error updating CloudTrail trail: {e}")
+
+def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region, capture_s3_uri):
+    # Set up CloudTrail
+    place = region
+    setup_cloudtrail(place, "sagemaker-cloudtrail", capture_s3_uri.split('/')[2])
+
     # Create a SageMaker client
     sagemaker_client = boto3.client('sagemaker', region_name=region)
     
@@ -215,11 +345,18 @@ def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region):
         image_uri=image_uri
     )
     
+    data_capture_config = sagemaker.model_monitor.DataCaptureConfig(
+        enable_capture=True,
+        sampling_percentage=100,
+        destination_s3_uri=capture_s3_uri
+    )
+    
     # Deploy the model to create a SageMaker endpoint
     huggingface_model.deploy(
         initial_instance_count=1,
         instance_type=instance_type,
-        endpoint_name="gpt-2-model-endpoint-realtime-inference"  # Replace with your desired endpoint 
+        endpoint_name="gpt-2-model-endpoint-realtime-inference",  # Replace with your desired endpoint 
+        data_capture_config=data_capture_config  # Pass data capture config
     )  
     
     # Wait for the endpoint to be in service
@@ -227,36 +364,75 @@ def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region):
     while endpoint_status != 'InService':
         response = sagemaker_client.describe_endpoint(EndpointName="gpt-2-model-endpoint-realtime-inference")
         endpoint_status = response["EndpointStatus"]
-        time.sleep(10)  # Wait for 10 seconds before checking again
+        time.sleep(120)  # Wait for 120 seconds before checking again
     
     print("SageMaker Endpoint is now in service.")
     
+    # Configure CloudWatch to monitor the endpoint
+    cloudwatch_client = boto3.client('cloudwatch')
+    response = cloudwatch_client.put_metric_alarm(
+        AlarmName='YourEndpointHealthAlarm',
+        ComparisonOperator='GreaterThanThreshold',
+        EvaluationPeriods=1,
+        MetricName='CPUUtilization',
+        Namespace='/aws/sagemaker/Endpoints',
+        Period=300,  # Period should match the evaluation period (5 minutes)
+        Statistic='Maximum',
+        Threshold=70.0,
+        ActionsEnabled=False,
+        AlarmDescription='Alarm when CPU utilization exceeds 70%',
+        Dimensions=[
+            {
+                'Name': 'EndpointName',
+                'Value': 'gpt-2-model-endpoint-realtime-inference'
+            },
+            {
+                'Name': 'VariantName',
+                'Value': 'AllTraffic'
+            }
+        ],
+        Unit='Percent'
+    )
+    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        print("CloudWatch alarm created:", response['ResponseMetadata']['HTTPStatusCode'])
+    else: 
+        print("Error creating CloudWatch alarm. Response from AWS was: ", response)
+    
+    # Set up a CloudWatch event rule to trigger storing the metrics in S3 periodically
+    cloudwatch_events_client = boto3.client('events')
+
+    response = cloudwatch_events_client.put_rule(
+        Name='CaptureDataToS3Rule',
+        ScheduleExpression='rate(5 minutes)',  # Adjust the schedule as needed
+        State='ENABLED'
+    )
+
+    cloudwatch_events_client.put_targets(
+        Rule='CaptureDataToS3Rule',
+        Targets=[
+            {
+                'Id': '1',
+                'Arn': 'arn:aws:lambda:ap-south-1:219289179534:function:gpt-2-model-lambda'  # Replace with your Lambda function ARN
+            },
+        ]
+    )
+    
+    print("CloudWatch event rule set up.")
+
     # Return the endpoint name for reference
     return "gpt-2-model-endpoint-realtime-inference"
 
 if __name__ == "__main__":
-    # Set your model S3 URI, SageMaker role, instance type, and region
+    # Set your model S3 URI, SageMaker role, instance type, region, and capture S3 URI
     model_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/gpt_2/gpt2_model.tar.gz"
     role_arn = "arn:aws:iam::219289179534:role/service-role/AmazonSageMaker-ExecutionRole-20240118T015346"
-    instance_type = "ml.m5.xlarge"  # Eligible for the AWS Free Tier
+    instance_type = "ml.m5.xlarge"  
     region = "ap-south-1"
+    capture_s3_uri = "s3://sagemaker-ap-south-1-219289179534/models/logs/"  # Replace with your capture bucket
 
     os.environ["HF_TASK"] = "text-generation"
     
     # Deploy the GPT-2 model to SageMaker
-    endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region)
+    endpoint_name = deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region, capture_s3_uri)
     print("SageMaker Endpoint Name:", endpoint_name)
-
-
-
-
-
-
-
-
-
-
-
-
-
 

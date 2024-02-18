@@ -62,7 +62,7 @@ jobs:
       #   run: python scripts/upload_model_to_s3.py
 
       # - name: Deploy to SageMaker
-      #   run: python scripts/deploy_to_sagemaker.py
+      #   run: python scripts/deploy_to_sagemaker.py 
 
       - name: Update Lambda Function Code
         run: |

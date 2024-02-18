@@ -4,7 +4,7 @@ import boto3
 
 def lambda_handler(event, context):
     try:
-        #Extract input text and parameters from the Lambda event
+        # Extract input text and parameters from the Lambda event
         input_text = event['inputs']
         parameters = event['parameters']
 

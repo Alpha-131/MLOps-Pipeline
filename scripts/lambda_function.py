@@ -54,7 +54,7 @@ def lambda_handler(event, context):
 
 
 def capture_data_in_s3(event):
-    # Extract captured data from the event payload
+    #Extract captured data from the event payload
     captured_data = event.get('capture_data')  # Modify this based on the actual structure of the captured data
 
     # Store captured data in an S3 bucket

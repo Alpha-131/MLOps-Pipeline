@@ -66,5 +66,5 @@ jobs:
 
       - name: Deploy Lambda Function
         run: 
-          aws lambda update-function-code --function-name gpt-2-model-lambda --zip-file fileb://lambda_function.zip
+          aws lambda update-function-code --function-name gpt-2-model-lambda --zip-file scripts\lambda_function.zip
           aws lambda update-function-configuration --function-name gpt-2-model-lambda --environment "Variables={SAGEMAKER_ENDPOINT=gpt-2-model-endpoint-realtime-inference}"

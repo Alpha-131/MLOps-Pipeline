@@ -281,7 +281,7 @@ import time
 import os 
 
 def setup_cloudtrail(region, trail_name, s3_bucket_name):
-    # Create a CloudTrail client
+    #Create a CloudTrail client
     cloudtrail_client = boto3.client('cloudtrail', region_name=region)
 
     try:

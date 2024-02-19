@@ -368,7 +368,7 @@ def deploy_to_sagemaker(model_s3_uri, role_arn, instance_type, region, capture_s
     
     print("SageMaker Endpoint is now in service.")
     
-    # Configure CloudWatch to monitor the endpoint
+    # Configure CloudWatch  to monitor the endpoint
     cloudwatch_client = boto3.client('cloudwatch')
     response = cloudwatch_client.put_metric_alarm(
         AlarmName='YourEndpointHealthAlarm',
